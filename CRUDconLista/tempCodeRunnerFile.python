@@ -1,0 +1,9 @@
+
+
+def suma(*nums):
+    for num in nums:
+        total += num
+    return total
+
+resultado = suma(1,2,3,4,5,6)
+print(resultado)
