@@ -16,7 +16,10 @@ while(True):
         print(f"Connection failed, error: {error}, retrying in 3 seg")
         time.sleep(3)
 
-app = FastAPI()
+app = FastAPI(title="API with Postgress DB", version="0.1", 
+              contact={
+                    "name": "My github",
+                     "url": "https://github.com/chavezmg"})
 
 class Post(BaseModel):
     title: str
@@ -51,8 +54,8 @@ async def create_post(post: Post):
     return {'data': new_post}
 
 @app.delete('/posts/{id}')
-async def delete_post(id: int):
-    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
+async def delete_post(id: int):    
+    cursor.execute(f""" DELETE FROM posts WHERE id = {id} RETURNING *""")
     post = cursor.fetchone()
     if (post!=None):
         conn.commit()
@@ -60,7 +63,7 @@ async def delete_post(id: int):
     raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, 
                         detail=f'Post with id: {id} not found')
 
-@app.put('/posts/{id}')
+@app.put('/posts/{id}'  )
 async def update_post(id: int, post: Post):
     cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",
                     (post.title, post.content, post.published, id))
