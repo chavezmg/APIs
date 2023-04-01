@@ -4,6 +4,13 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from pw import _password, _user, _db, _host
+from enum import Enum
+
+class Sort_by(str, Enum):
+    ID = 'ID'
+    TITLE = 'Title'
+    PUBLISHED = 'Published'
+
 
 while(True):
     try:
@@ -25,6 +32,21 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
+
+@app.get('/sort')
+async def sort(sort_by: Sort_by):
+    print(sort_by.value)
+    if(sort_by.value=='ID'):
+        cursor.execute("""SELECT * FROM posts ORDER BY id ASC """)
+        post = cursor.fetchall()
+    elif(sort_by.value=='Title'):
+        cursor.execute("""SELECT * FROM posts ORDER BY title ASC """)
+        post = cursor.fetchall()
+    elif(sort_by.value=='Published'):
+        cursor.execute("""SELECT * FROM posts WHERE published=true""")
+        post = cursor.fetchall()
+
+    return {'Sorted data': post}
 
 @app.get('/')
 async def root():
