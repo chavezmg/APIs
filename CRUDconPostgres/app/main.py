@@ -10,7 +10,15 @@ class Sort_by(str, Enum):
     ID = 'ID'
     TITLE = 'Title'
     PUBLISHED = 'Published'
+    CREATED = 'Created'
 
+class Sort_type(str, Enum):
+    ASCENDING = 'Ascending'
+    DESCENDING = 'Descending'
+
+class Sort_bool(str, Enum):
+    TRUE = 'True'
+    FALSE = 'False'
 
 while(True):
     try:
@@ -33,24 +41,46 @@ class Post(BaseModel):
     content: str
     published: bool = True
 
-@app.get('/sort')
-async def sort(sort_by: Sort_by):
-    print(sort_by.value)
-    if(sort_by.value=='ID'):
-        cursor.execute("""SELECT * FROM posts ORDER BY id ASC """)
-        post = cursor.fetchall()
-    elif(sort_by.value=='Title'):
-        cursor.execute("""SELECT * FROM posts ORDER BY title ASC """)
-        post = cursor.fetchall()
-    elif(sort_by.value=='Published'):
-        cursor.execute("""SELECT * FROM posts WHERE published=true""")
-        post = cursor.fetchall()
-
-    return {'Sorted data': post}
-
 @app.get('/')
 async def root():
     return {"Welcome": "to my API"}
+
+@app.get('/sort')
+async def sort(sort_by: Sort_by, sort_type: Sort_type, sort_bool: Sort_bool):
+    print(sort_by.value)
+    if(sort_by.value=='ID'):
+        if(sort_type.value=='Ascending'):
+            cursor.execute("""SELECT * FROM posts ORDER BY id ASC """)
+            post = cursor.fetchall()
+        else:
+            cursor.execute("""SELECT * FROM posts ORDER BY id DESC """)
+            post = cursor.fetchall()
+    elif(sort_by.value=='Title'):
+        cursor.execute("""SELECT * FROM posts ORDER BY title ASC """)
+        post = cursor.fetchall()
+        if(sort_type.value=='Ascending'):
+            cursor.execute("""SELECT * FROM posts ORDER BY title ASC """)
+            post = cursor.fetchall()
+        else:
+            cursor.execute("""SELECT * FROM posts ORDER BY title DESC """)
+            post = cursor.fetchall()
+    elif(sort_by.value=='Published'):
+        if(sort_bool=='True'):
+            cursor.execute("""SELECT * FROM posts WHERE published=true""")
+            post = cursor.fetchall()
+        else:
+            cursor.execute("""SELECT * FROM posts WHERE published=false""")
+            post = cursor.fetchall()
+    elif(sort_by.value=='Created'):
+        if(sort_type.value=='Ascending'):
+            cursor.execute("""SELECT * FROM posts ORDER BY created_at ASC""")
+            post = cursor.fetchall()
+        else:
+            cursor.execute("""SELECT * FROM posts ORDER BY created_at DESC """)
+            post = cursor.fetchall()
+
+    return {'Sorted data': post}
+
 
 @app.get('/posts')
 async def get_posts():
